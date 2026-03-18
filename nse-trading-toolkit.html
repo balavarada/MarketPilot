@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSE Trading Toolkit — v2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0c0f;
+      --surface: #111318;
+      --surface2: #191c23;
+      --border: #232730;
+      --border2: #2e3340;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --accent: #f0b429;
+      --accent-dim: #f0b42920;
+      --accent-border: #f0b42940;
+      --green: #22c55e;
+      --green-dim: #22c55e18;
+      --green-border: #22c55e35;
+      --red: #ef4444;
+      --red-dim: #ef444418;
+      --red-border: #ef444435;
+      --blue: #60a5fa;
+      --blue-dim: #60a5fa18;
+      --blue-border: #60a5fa35;
+      --purple: #a78bfa;
+      --purple-dim: #a78bfa18;
+      --purple-border: #a78bfa35;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+    .version-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 4px;
+    }
+
+    /* LAYOUT */
+    .layout { display: flex; height: calc(100vh - 52px); }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 20px;
+    }
+    .nav-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+    .nav-item .new-badge {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 2px 5px;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+      border-radius: 3px;
+    }
+    .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* PANELS */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* PAGE HEADER */
+    .page-header { margin-bottom: 24px; }
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .page-sub { font-size: 13px; color: var(--muted); }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* METRICS */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .metric-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .metric-lbl { font-size: 12px; color: var(--muted); }
+    .metric-card.pos .metric-val { color: var(--green); }
+    .metric-card.neg .metric-val { color: var(--red); }
+    .metric-card.accent .metric-val { color: var(--accent); }
+
+    /* FORM ELEMENTS */
+    .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+    .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    input, select, textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: var(--surface2); }
+    textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--surface2); color: var(--text); }
+    .btn-accent {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn-accent:hover { opacity: 0.9; color: #000; background: var(--accent); }
+    .btn-red { background: var(--red-dim); color: var(--red); border-color: var(--red-border); font-size: 12px; padding: 5px 10px; }
+    .btn-green { background: var(--green-dim); color: var(--green); border-color: var(--green-border); font-size: 12px; padding: 5px 10px; }
+    .btn-purple {
+      background: var(--purple-dim);
+      color: var(--purple);
+      border: 1px solid var(--purple-border);
+      padding: 8px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-purple:hover { background: #a78bfa30; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+    .badge-ce { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+    .badge-pe { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+    .badge-eq { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); }
+    .badge-fut { background: var(--purple-dim); color: var(--purple); border-color: var(--purple-border); }
+    .badge-open { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+    .badge-closed { background: var(--surface2); color: var(--muted); border-color: var(--border); }
+    .badge-buy { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+    .badge-sell { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+    .badge-hold { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+
+    /* PNL */
+    .profit { color: var(--green); font-family: 'DM Mono', monospace; }
+    .loss { color: var(--red); font-family: 'DM Mono', monospace; }
+    .mono { font-family: 'DM Mono', monospace; }
+
+    /* RESULT BOX */
+    .result-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      color: var(--text);
+      min-height: 60px;
+    }
+    .result-box.loading { color: var(--muted); font-style: italic; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 28px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      line-height: 1.6;
+    }
+
+    /* STEPS */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step-item { display: flex; align-items: flex-start; gap: 12px; }
+    .step-num {
+      width: 22px; height: 22px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 13px; color: var(--muted); line-height: 1.6; padding-top: 2px; }
+    .step-text a { color: var(--accent); text-decoration: none; }
+
+    /* CMP CLICK */
+    .cmp-click { cursor: pointer; color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* MSG */
+    .msg-ok { color: var(--green); font-size: 13px; margin-top: 10px; }
+    .msg-err { color: var(--red); font-size: 13px; margin-top: 10px; }
+
+    /* ── TOP 10 SPECIFIC STYLES ── */
+    .picks-hero {
+      background: linear-gradient(135deg, #111318 0%, #0f1520 50%, #111318 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .picks-hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, #f0b42915 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .picks-hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .picks-week-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .picks-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .picks-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .picks-meta-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .picks-meta-lbl {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .filter-chip:hover { border-color: var(--border2); color: var(--text); }
+    .filter-chip.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+    .filter-chip.buy-chip.active { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+    .filter-chip.sell-chip.active { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+
+    /* STOCK PICK CARDS */
+    .picks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .pick-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      transition: border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .pick-card.buy-card { border-left: 3px solid var(--green); }
+    .pick-card.sell-card { border-left: 3px solid var(--red); }
+    .pick-card:hover { border-color: var(--border2); }
+    .pick-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .pick-rank {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .pick-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pick-sector {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .pick-action-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pick-action-badge.buy { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+    .pick-action-badge.sell { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+    .pick-levels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .pick-level {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pick-level-lbl {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+    }
+    .pick-level-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .pick-level-val.target { color: var(--green); }
+    .pick-level-val.stoploss { color: var(--red); }
+    .pick-upside {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .pick-upside.downside {
+      background: var(--red-dim);
+      color: var(--red);
+      border-color: var(--red-border);
+    }
+    .pick-rationale {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .pick-confidence {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .confidence-bar {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .confidence-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+    .confidence-fill.high { background: var(--green); }
+    .confidence-fill.medium { background: var(--accent); }
+    .confidence-fill.low { background: var(--red); }
+    .confidence-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* LOADING SPINNER */
+    .loading-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      gap: 16px;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .loading-step {
+      font-size: 12px;
+      color: var(--border2);
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.3s;
+    }
+    .loading-step.done { color: var(--green); }
+    .loading-step.active { color: var(--accent); }
+    .loading-step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* MARKET CONTEXT GRID */
+    .context-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .context-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+    .context-lbl { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+    .context-val { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--text); }
+
+    /* SECTOR BREAKDOWN */
+    .sector-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sector-row:last-child { border-bottom: none; }
+    .sector-name { font-size: 12px; color: var(--text); width: 120px; flex-shrink: 0; }
+    .sector-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .sector-bar { height: 100%; border-radius: 2px; }
+    .sector-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); width: 20px; text-align: right; }
+
+    /* TABS */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+    .tab {
+      font-size: 13px;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ERROR BOX */
+    .error-box {
+      background: var(--red-dim);
+      border: 1px solid var(--red-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      color: var(--red);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* RESULT BOX */
+    .result-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      color: var(--text);
+      min-height: 60px;
+    }
+    .result-box.loading { color: var(--muted); font-style: italic; }
+
+    @media (max-width: 900px) {
+      .picks-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row.cols-4 { grid-template-columns: 1fr 1fr; }
+      .context-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">NSE Toolkit <span>powered by Claude AI</span></div>
+  <div class="version-badge">v2.0</div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Weekly Agent</div>
+      <div class="nav-item active" onclick="showPanel('picks', this)">
+        <span class="nav-icon">🎯</span> Top 10 Picks
+        <span class="new-badge">NEW</span>
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Analysis</div>
+      <div class="nav-item" onclick="showPanel('plan', this)">
+        <span class="nav-icon">📋</span> Trade Plan
+      </div>
+      <div class="nav-item" onclick="showPanel('sentiment', this)">
+        <span class="nav-icon">📰</span> Sentiment
+      </div>
+      <div class="nav-item" onclick="showPanel('options', this)">
+        <span class="nav-icon">⛓</span> Options Chain
+      </div>
+      <div class="nav-item" onclick="showPanel('rr', this)">
+        <span class="nav-icon">⚖️</span> Risk / Reward
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Portfolio</div>
+      <div class="nav-item" onclick="showPanel('open', this)">
+        <span class="nav-icon">📂</span> Open Trades
+      </div>
+      <div class="nav-item" onclick="showPanel('add', this)">
+        <span class="nav-icon">➕</span> Add Trade
+      </div>
+      <div class="nav-item" onclick="showPanel('closed', this)">
+        <span class="nav-icon">✅</span> Closed Trades
+      </div>
+      <div class="nav-item" onclick="showPanel('review', this)">
+        <span class="nav-icon">🤖</span> Claude Review
+      </div>
+      <div class="nav-item" onclick="showPanel('journal', this)">
+        <span class="nav-icon">📓</span> Trade Journal
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- TOP 10 WEEKLY PICKS                        -->
+    <!-- ══════════════════════════════════════════ -->
+    <div id="panel-picks" class="panel active">
+      <div class="page-header">
+        <div class="page-title">🎯 Top 10 Weekly Stock Picks</div>
+        <div class="page-sub">Provide market context → Claude's agent generates ranked Buy/Sell ideas for the week</div>
+      </div>
+
+      <!-- INPUT CARD -->
+      <div class="card" id="picks-input-card">
+        <div class="card-title">Market context for this week</div>
+        <div class="form-row cols-3">
+          <div class="field">
+            <label>Week of</label>
+            <input id="pk-week" placeholder="e.g. 17–21 Mar 2026" />
+          </div>
+          <div class="field">
+            <label>Nifty 50 current level</label>
+            <input type="number" id="pk-nifty" placeholder="e.g. 22400" />
+          </div>
+          <div class="field">
+            <label>India VIX</label>
+            <input id="pk-vix" placeholder="e.g. 13.5" />
+          </div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="field">
+            <label>Nifty trend (last 5 days)</label>
+            <select id="pk-trend">
+              <option value="Strong Uptrend">Strong Uptrend 🚀</option>
+              <option value="Mild Uptrend" selected>Mild Uptrend 📈</option>
+              <option value="Sideways / Rangebound">Sideways / Rangebound ↔️</option>
+              <option value="Mild Downtrend">Mild Downtrend 📉</option>
+              <option value="Strong Downtrend">Strong Downtrend 🔻</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>FII / DII activity</label>
+            <select id="pk-fii">
+              <option value="FII & DII both buying">FII &amp; DII both buying</option>
+              <option value="FII buying, DII mixed" selected>FII buying, DII mixed</option>
+              <option value="FII selling, DII buying">FII selling, DII buying</option>
+              <option value="Both selling">Both selling</option>
+              <option value="Mixed / unclear">Mixed / unclear</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Trade preference</label>
+            <select id="pk-pref">
+              <option value="Equity (cash) only">Equity (cash) only</option>
+              <option value="Options only (CE/PE)">Options only (CE/PE)</option>
+              <option value="Both equity and options" selected>Both equity and options</option>
+              <option value="Futures (FUT)">Futures (FUT)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="field">
+            <label>Risk profile</label>
+            <select id="pk-risk">
+              <option value="Conservative (low risk, stable stocks)">Conservative 🛡️</option>
+              <option value="Moderate (balanced risk/reward)" selected>Moderate ⚖️</option>
+              <option value="Aggressive (high risk, high reward)">Aggressive 🔥</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Sectors to focus (optional)</label>
+            <input id="pk-sectors" placeholder="e.g. Banking, IT, Pharma, Auto — or leave blank for all" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Key macro events this week (optional)</label>
+            <input id="pk-macro" placeholder="e.g. RBI MPC meet, US CPI data, Q3 results season, Budget vote..." />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Additional market notes (optional)</label>
+            <textarea id="pk-notes" placeholder="e.g. Global markets positive. Oil at $80. IT sector facing headwinds. Auto sector strong due to festive sales. Any specific stocks you've been watching..."></textarea>
+          </div>
+        </div>
+        <!-- LIVE PRICE TABLE -->
+        <div style="background:var(--surface2); border:1px solid var(--accent-border); border-radius:var(--radius-lg); padding:16px; margin-bottom:12px;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+            <div>
+              <div style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent); margin-bottom:4px;">⚠️ Enter Live Prices — Required for Accuracy</div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.6;">Claude has no internet access and will <strong style="color:var(--red);">guess stale prices</strong> from old training data (may be 1–2 years off).<br>Paste current prices from <a href="https://www.screener.in" target="_blank" style="color:var(--accent);">screener.in</a> or <a href="https://nseindia.com" target="_blank" style="color:var(--accent);">nseindia.com</a> so targets &amp; SL levels are accurate.</div>
+            </div>
+            <button class="btn" style="font-size:11px; padding:5px 12px; flex-shrink:0;" onclick="addPriceRow()">+ Add stock</button>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+            <span style="font-size:11px; color:var(--muted); align-self:center;">Quick add:</span>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('RELIANCE')">RELIANCE</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('HDFCBANK')">HDFCBANK</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('INFY')">INFY</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('TCS')">TCS</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('ICICIBANK')">ICICIBANK</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('TATAMOTORS')">TATAMOTORS</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('WIPRO')">WIPRO</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('AXISBANK')">AXISBANK</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('BAJFINANCE')">BAJFINANCE</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('SBIN')">SBIN</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('HINDUNILVR')">HINDUNILVR</button>
+            <button class="filter-chip" style="font-size:10px; padding:3px 8px;" onclick="quickAdd('MARUTI')">MARUTI</button>
+          </div>
+          <div id="price-rows-wrap">
+            <div style="display:grid; grid-template-columns:1fr 110px 110px 110px 32px; gap:6px; margin-bottom:6px; padding:0 4px;">
+              <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);">SYMBOL</div>
+              <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);">CMP (₹)</div>
+              <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);">52W HIGH</div>
+              <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);">52W LOW</div>
+              <div></div>
+            </div>
+            <div id="price-rows"></div>
+          </div>
+          <div style="font-size:11px; color:var(--muted); margin-top:10px;">💡 CMP = Current Market Price from Screener.in. 52W High/Low optional but improves analysis quality.</div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-accent" style="font-size:14px; padding:10px 24px;" onclick="runTopPicks()">
+            🎯 Generate Top 10 Picks →
+          </button>
+          <span style="font-size:12px; color: var(--muted);">Claude uses your live prices for accurate entry, target &amp; SL levels</span>
+        </div>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="loading-overlay" id="picks-loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Agent is working...</div>
+        <div class="loading-steps">
+          <div class="loading-step" id="ls-1"><div class="loading-step-dot"></div>Scanning NSE universe for momentum stocks</div>
+          <div class="loading-step" id="ls-2"><div class="loading-step-dot"></div>Analyzing sector rotation & FII flows</div>
+          <div class="loading-step" id="ls-3"><div class="loading-step-dot"></div>Scoring technical setups</div>
+          <div class="loading-step" id="ls-4"><div class="loading-step-dot"></div>Ranking by risk-adjusted return</div>
+          <div class="loading-step" id="ls-5"><div class="loading-step-dot"></div>Generating entry/target/SL levels</div>
+        </div>
+      </div>
+
+      <!-- RESULTS AREA -->
+      <div id="picks-results" style="display:none;">
+        <!-- Hero summary -->
+        <div class="picks-hero">
+          <div class="picks-hero-title">Weekly Picks Report</div>
+          <div class="picks-week-label" id="res-week-label">Week of —</div>
+          <div class="picks-meta">
+            <div class="picks-meta-item"><div class="picks-meta-val" id="res-nifty">—</div><div class="picks-meta-lbl">Nifty Level</div></div>
+            <div class="picks-meta-item"><div class="picks-meta-val" id="res-vix">—</div><div class="picks-meta-lbl">India VIX</div></div>
+            <div class="picks-meta-item"><div class="picks-meta-val" id="res-bias">—</div><div class="picks-meta-lbl">Market Bias</div></div>
+            <div class="picks-meta-item"><div class="picks-meta-val" id="res-buys" style="color:var(--green)">—</div><div class="picks-meta-lbl">Buy picks</div></div>
+            <div class="picks-meta-item"><div class="picks-meta-val" id="res-sells" style="color:var(--red)">—</div><div class="picks-meta-lbl">Sell picks</div></div>
+          </div>
+        </div>
+
+        <!-- Market overview -->
+        <div class="card" id="res-overview-card" style="display:none;">
+          <div class="card-title">Market Overview & Rationale</div>
+          <div id="res-overview" style="font-size:13px; line-height:1.8; color:var(--muted);"></div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <span style="font-size:12px; color:var(--muted); margin-right:4px;">Filter:</span>
+          <button class="filter-chip active" onclick="filterPicks('all', this)">All 10</button>
+          <button class="filter-chip buy-chip" onclick="filterPicks('buy', this)">Buy only</button>
+          <button class="filter-chip sell-chip" onclick="filterPicks('sell', this)">Sell / Short</button>
+          <button class="filter-chip" onclick="filterPicks('high', this)">High confidence</button>
+          <button style="margin-left:auto;" class="btn" onclick="resetPicks()">← New search</button>
+        </div>
+
+        <!-- Picks grid -->
+        <div class="picks-grid" id="picks-grid"></div>
+
+        <!-- Raw analysis tab -->
+        <div class="card">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab('cards', this)">📊 Cards view</div>
+            <div class="tab" onclick="switchTab('raw', this)">📄 Full analysis</div>
+            <div class="tab" onclick="switchTab('sectors', this)">🗂 By sector</div>
+          </div>
+          <div id="tab-cards" style="display:none;"></div>
+          <div id="tab-raw" style="display:none; white-space:pre-wrap; font-size:13px; line-height:1.8; color:var(--muted);"></div>
+          <div id="tab-sectors" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="picks-error" style="display:none;"></div>
+
+      <p class="disclaimer">⚠️ Not financial advice. Claude's picks are AI-generated analysis based only on the data you provide. Past performance of any stock does not guarantee future results. Always do your own research, use stop losses, and verify independently before placing any trade.</p>
+    </div>
+
+    <!-- TRADE PLAN -->
+    <div id="panel-plan" class="panel">
+      <div class="page-header">
+        <div class="page-title">Daily Trade Plan</div>
+        <div class="page-sub">Paste today's market data → Claude generates a structured trade idea</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Market data</div>
+        <div class="form-row cols-2">
+          <div class="field"><label>Stock / Index</label><input id="p-stock" placeholder="e.g. NIFTY 50, BANKNIFTY, RELIANCE" /></div>
+          <div class="field"><label>Date</label><input id="p-date" placeholder="e.g. 17 Mar 2026" /></div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="field"><label>Current spot (₹)</label><input type="number" id="p-spot" placeholder="22400" /></div>
+          <div class="field"><label>Previous close (₹)</label><input type="number" id="p-prev" placeholder="22280" /></div>
+          <div class="field"><label>India VIX</label><input id="p-vix" placeholder="e.g. 13.5 (low)" /></div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="field">
+            <label>Risk appetite</label>
+            <select id="p-risk">
+              <option>Conservative (small loss OK)</option>
+              <option>Moderate (medium risk)</option>
+              <option>Aggressive (high risk, high reward)</option>
+            </select>
+          </div>
+          <div class="field"><label>Capital available (₹)</label><input type="number" id="p-capital" placeholder="50000" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Support / Resistance levels (optional)</label><input id="p-levels" placeholder="e.g. Support: 22200, 22000 | Resistance: 22500, 22700" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Today's news (optional)</label><textarea id="p-news" placeholder="e.g. RBI policy unchanged, US Fed dovish, IT sector weak, FII buying..."></textarea></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Options chain snapshot (optional)</label><textarea id="p-chain" placeholder="Strike | CE OI | CE LTP | PE OI | PE LTP&#10;22200  | 55000  | 180    | 8000  | 60&#10;..."></textarea></div>
+        </div>
+        <button class="btn btn-accent" onclick="runPlan()">Generate trade plan →</button>
+        <div id="p-result" class="result-box" style="display:none;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">How to get the data</div>
+        <div class="steps">
+          <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to <a href="https://nseindia.com" target="_blank">nseindia.com</a> → Market Data → Live Market</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-text">Note the current Nifty / BankNifty spot price and previous close</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-text">Check India VIX on the same page (lower = calmer market)</div></div>
+          <div class="step-item"><div class="step-num">4</div><div class="step-text">For options chain: NSE → Derivatives → Options Chain → copy the table</div></div>
+          <div class="step-item"><div class="step-num">5</div><div class="step-text">Paste everything above and hit Generate</div></div>
+        </div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice. Claude's analysis is based only on the data you provide. Always use a stop loss and verify independently before placing any trade on Groww, Zerodha, or any other platform.</p>
+    </div>
+
+    <!-- SENTIMENT -->
+    <div id="panel-sentiment" class="panel">
+      <div class="page-header">
+        <div class="page-title">News Sentiment Analysis</div>
+        <div class="page-sub">Paste headlines or earnings snippets → Claude gives a Bullish / Bearish / Neutral verdict</div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="field"><label>Stock / Index</label><input id="s-stock" placeholder="e.g. RELIANCE, NIFTY 50, HDFC Bank" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>News headlines or earnings snippets</label><textarea id="s-news" style="min-height:120px;" placeholder="e.g. Reliance Q3 profit +12% YoY, JioMart expands to 200 cities, crude oil prices soften..."></textarea></div>
+        </div>
+        <button class="btn btn-accent" onclick="runSentiment()">Analyze sentiment →</button>
+        <div id="s-result" class="result-box" style="display:none;"></div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice.</p>
+    </div>
+
+    <!-- OPTIONS CHAIN -->
+    <div id="panel-options" class="panel">
+      <div class="page-header">
+        <div class="page-title">Options Chain Reader</div>
+        <div class="page-sub">Paste the options chain from NSE → Claude interprets PCR, max pain, and smart money positioning</div>
+      </div>
+      <div class="card">
+        <div class="form-row cols-2">
+          <div class="field"><label>Stock / Index</label><input id="o-stock" placeholder="e.g. NIFTY, BANKNIFTY" /></div>
+          <div class="field"><label>Expiry</label><input id="o-expiry" placeholder="e.g. 27 Mar 2026" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Options chain data (from NSE website or broker)</label>
+          <textarea id="o-chain" style="min-height:120px;" placeholder="Strike | CE OI | CE LTP | PE OI | PE LTP&#10;22000  | 45000  | 120    | 12000 | 85&#10;22200  | 38000  | 90     | 18000 | 110&#10;..."></textarea></div>
+        </div>
+        <button class="btn btn-accent" onclick="runOptions()">Read options chain →</button>
+        <div id="o-result" class="result-box" style="display:none;"></div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice.</p>
+    </div>
+
+    <!-- RISK REWARD -->
+    <div id="panel-rr" class="panel">
+      <div class="page-header">
+        <div class="page-title">Risk / Reward Calculator</div>
+        <div class="page-sub">Enter your trade setup → Claude calculates max profit, max loss, and whether it's worth taking</div>
+      </div>
+      <div class="card">
+        <div class="form-row cols-2">
+          <div class="field"><label>Stock / Index</label><input id="r-stock" placeholder="e.g. NIFTY" /></div>
+          <div class="field"><label>Strategy</label>
+            <select id="r-strategy">
+              <option>Buy Call (CE)</option>
+              <option>Buy Put (PE)</option>
+              <option>Bull Call Spread</option>
+              <option>Bear Put Spread</option>
+              <option>Iron Condor</option>
+              <option>Straddle</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="field"><label>Strike price (₹)</label><input type="number" id="r-strike" placeholder="22000" /></div>
+          <div class="field"><label>Premium paid (₹)</label><input type="number" id="r-premium" placeholder="120" /></div>
+          <div class="field"><label>Lot size</label><input type="number" id="r-lot" placeholder="50" /></div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="field"><label>Current spot price (₹)</label><input type="number" id="r-spot" placeholder="21950" /></div>
+          <div class="field"><label>Target price (₹)</label><input type="number" id="r-target" placeholder="22300" /></div>
+        </div>
+        <button class="btn btn-accent" onclick="runRR()">Calculate risk / reward →</button>
+        <div id="r-result" class="result-box" style="display:none;"></div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice.</p>
+    </div>
+
+    <!-- OPEN TRADES -->
+    <div id="panel-open" class="panel">
+      <div class="page-header">
+        <div class="page-title">Open Trades</div>
+        <div class="page-sub">Your live positions. Click CMP to update price.</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card accent"><div class="metric-val" id="m-open">0</div><div class="metric-lbl">Open positions</div></div>
+        <div class="metric-card" id="m-invest-card"><div class="metric-val" id="m-invest">₹0</div><div class="metric-lbl">Capital deployed</div></div>
+        <div class="metric-card" id="m-unreal-card"><div class="metric-val" id="m-unreal">₹0</div><div class="metric-lbl">Unrealised P&L</div></div>
+        <div class="metric-card" id="m-real-card"><div class="metric-val" id="m-real">₹0</div><div class="metric-lbl">Realised P&L</div></div>
+      </div>
+      <div class="card" style="padding: 0;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Stock</th><th>Type</th><th>Strike</th><th>Expiry</th>
+                <th>Entry ₹</th><th>CMP ₹</th><th>Lots</th><th>Lot size</th>
+                <th>Invested ₹</th><th>P&L ₹</th><th>SL ₹</th><th>Target ₹</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="open-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="disclaimer">⚠️ Update CMP manually to see live P&L. Not financial advice.</p>
+    </div>
+
+    <!-- ADD TRADE -->
+    <div id="panel-add" class="panel">
+      <div class="page-header">
+        <div class="page-title">Add Trade</div>
+        <div class="page-sub">Log a new position to your portfolio</div>
+      </div>
+      <div class="card">
+        <div class="form-row cols-2">
+          <div class="field"><label>Stock / Index</label><input id="a-stock" placeholder="e.g. NIFTY, RELIANCE" /></div>
+          <div class="field"><label>Entry date</label><input id="a-date" placeholder="e.g. 17 Mar 2026" /></div>
+        </div>
+        <div class="form-row cols-3">
+          <div class="field"><label>Option type</label>
+            <select id="a-type">
+              <option value="CE">CE (Call)</option>
+              <option value="PE">PE (Put)</option>
+              <option value="EQ">EQ (Equity)</option>
+              <option value="FUT">FUT (Futures)</option>
+            </select>
+          </div>
+          <div class="field"><label>Strike price (₹)</label><input type="number" id="a-strike" placeholder="22400" /></div>
+          <div class="field"><label>Expiry</label><input id="a-expiry" placeholder="27 Mar 2026" /></div>
+        </div>
+        <div class="form-row cols-4">
+          <div class="field"><label>Entry price (₹)</label><input type="number" id="a-entry" placeholder="150" /></div>
+          <div class="field"><label>Current price (₹)</label><input type="number" id="a-cmp" placeholder="180" /></div>
+          <div class="field"><label>No. of lots</label><input type="number" id="a-lots" placeholder="1" /></div>
+          <div class="field"><label>Lot size</label><input type="number" id="a-lotsize" placeholder="50" /></div>
+        </div>
+        <div class="form-row cols-2">
+          <div class="field"><label>Stop loss (₹)</label><input type="number" id="a-sl" placeholder="100" /></div>
+          <div class="field"><label>Target (₹)</label><input type="number" id="a-tgt" placeholder="220" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Notes (optional)</label><input id="a-notes" placeholder="e.g. Based on bullish OI at 22200 support, RBI policy unchanged" /></div>
+        </div>
+        <button class="btn btn-accent" onclick="addTrade()">Add to portfolio →</button>
+        <div id="a-msg"></div>
+      </div>
+    </div>
+
+    <!-- CLOSED TRADES -->
+    <div id="panel-closed" class="panel">
+      <div class="page-header">
+        <div class="page-title">Closed Trades</div>
+        <div class="page-sub">Your trade history and realised P&L</div>
+      </div>
+      <div class="card" style="padding: 0;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Closed</th><th>Stock</th><th>Type</th><th>Strike</th><th>Entry ₹</th><th>Exit ₹</th><th>Lots</th><th>Lot sz</th><th>P&L ₹</th><th>Result</th></tr>
+            </thead>
+            <tbody id="closed-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice.</p>
+    </div>
+
+    <!-- CLAUDE REVIEW -->
+    <div id="panel-review" class="panel">
+      <div class="page-header">
+        <div class="page-title">Claude Portfolio Review</div>
+        <div class="page-sub">Get an honest AI assessment of your portfolio health, risk, and patterns</div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="field"><label>Specific question for Claude? (optional)</label>
+            <input id="rv-q" placeholder="e.g. Am I over-exposed? Which position should I close first?" />
+          </div>
+        </div>
+        <button class="btn btn-accent" onclick="runReview()">Review my portfolio →</button>
+        <div id="rv-result" class="result-box" style="display:none;"></div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice. Always verify independently.</p>
+    </div>
+
+    <!-- TRADE JOURNAL -->
+    <div id="panel-journal" class="panel">
+      <div class="page-header">
+        <div class="page-title">Trade Journal Coach</div>
+        <div class="page-sub">Paste past trades → Claude identifies patterns, mistakes, and psychology</div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="field"><label>Paste your recent trades (any format)</label>
+            <textarea id="j-trades" style="min-height:140px;" placeholder="Date       | Stock    | Strategy   | Entry  | Exit   | P&L&#10;10 Mar 26  | NIFTY    | Buy CE     | 150    | 210    | +₹3000&#10;12 Mar 26  | HDFC     | Buy PE     | 80     | 45     | -₹1750&#10;..."></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>What should Claude focus on? (optional)</label>
+            <input id="j-question" placeholder="e.g. What mistakes am I repeating? What's my win rate?" />
+          </div>
+        </div>
+        <button class="btn btn-accent" onclick="runJournal()">Analyze my trades →</button>
+        <div id="j-result" class="result-box" style="display:none;"></div>
+      </div>
+      <p class="disclaimer">⚠️ Not financial advice.</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // STATE
+  var trades = JSON.parse(localStorage.getItem('nse_trades') || '[]');
+  var closedTrades = JSON.parse(localStorage.getItem('nse_closed') || '[]');
+  var lastPicksData = null;
+  var currentFilter = 'all';
+  var priceRowId = 0;
+
+  function save() {
+    localStorage.setItem('nse_trades', JSON.stringify(trades));
+    localStorage.setItem('nse_closed', JSON.stringify(closedTrades));
+  }
+
+  // NAV
+  function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.getElementById('panel-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'open') { renderOpen(); updateMetrics(); }
+    if (name === 'closed') renderClosed();
+  }
+
+  // CLAUDE API
+  async function callClaude(prompt, systemPrompt, maxTokens) {
+    var body = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens || 1000,
+      messages: [{ role: 'user', content: prompt }]
+    };
+    if (systemPrompt) body.system = systemPrompt;
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.content.map(function(b) { return b.text || ''; }).join('\n');
+  }
+
+  function showLoading(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'block';
+    el.className = 'result-box loading';
+    el.textContent = 'Claude is analyzing... please wait';
+  }
+
+  function showResult(id, text) {
+    var el = document.getElementById(id);
+    el.style.display = 'block';
+    el.className = 'result-box';
+    el.textContent = text;
+  }
+
+  // PRICE TABLE HELPERS
+  function addPriceRow(symbol) {
+    var container = document.getElementById('price-rows');
+    var id = ++priceRowId;
+
+    var symInput = document.createElement('input');
+    symInput.className = 'pr-sym';
+    symInput.placeholder = 'e.g. HDFCBANK';
+    symInput.style.textTransform = 'uppercase';
+    if (symbol) symInput.value = symbol;
+
+    var cmpInput = document.createElement('input');
+    cmpInput.className = 'pr-cmp';
+    cmpInput.type = 'number';
+    cmpInput.placeholder = '845';
+
+    var highInput = document.createElement('input');
+    highInput.className = 'pr-high';
+    highInput.type = 'number';
+    highInput.placeholder = '1020';
+
+    var lowInput = document.createElement('input');
+    lowInput.className = 'pr-low';
+    lowInput.type = 'number';
+    lowInput.placeholder = '812';
+
+    var delBtn = document.createElement('button');
+    delBtn.textContent = 'x';
+    delBtn.style.cssText = 'background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);border-radius:var(--radius);cursor:pointer;font-size:14px;padding:0;';
+    delBtn.onclick = (function(rowId) { return function() { removePriceRow(rowId); }; })(id);
+
+    var div = document.createElement('div');
+    div.className = 'price-data-row';
+    div.id = 'pr-' + id;
+    div.style.cssText = 'display:grid;grid-template-columns:1fr 110px 110px 110px 32px;gap:6px;margin-bottom:6px;';
+    div.appendChild(symInput);
+    div.appendChild(cmpInput);
+    div.appendChild(highInput);
+    div.appendChild(lowInput);
+    div.appendChild(delBtn);
+    container.appendChild(div);
+    symInput.focus();
+  }
+
+  function quickAdd(symbol) {
+    var existing = Array.from(document.querySelectorAll('.pr-sym')).find(function(el) {
+      return el.value.trim().toUpperCase() === symbol;
+    });
+    if (existing) { existing.closest('.price-data-row').querySelector('.pr-cmp').focus(); return; }
+    addPriceRow(symbol);
+    setTimeout(function() {
+      var rows = document.querySelectorAll('.price-data-row');
+      var last = rows[rows.length - 1];
+      if (last) last.querySelector('.pr-cmp').focus();
+    }, 50);
+  }
+
+  function removePriceRow(id) {
+    var el = document.getElementById('pr-' + id);
+    if (el) el.remove();
+  }
+
+  // LOADING ANIMATION
+  var loadingInterval = null;
+
+  function animateLoadingSteps() {
+    var steps = ['ls-1','ls-2','ls-3','ls-4','ls-5'];
+    var i = 0;
+    steps.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.classList.remove('active','done'); }
+    });
+    loadingInterval = setInterval(function() {
+      if (i > 0) {
+        var prev = document.getElementById(steps[i-1]);
+        if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+      }
+      if (i < steps.length) {
+        var cur = document.getElementById(steps[i]);
+        if (cur) cur.classList.add('active');
+        i++;
+      } else {
+        clearInterval(loadingInterval);
+      }
+    }, 1200);
+  }
+
+  // TOP 10 PICKS
+  async function runTopPicks() {
+    var nifty = document.getElementById('pk-nifty').value.trim();
+    var week = document.getElementById('pk-week').value.trim() || 'this week';
+    var vix = document.getElementById('pk-vix').value.trim() || 'not provided';
+    var trend = document.getElementById('pk-trend').value;
+    var fii = document.getElementById('pk-fii').value;
+    var pref = document.getElementById('pk-pref').value;
+    var risk = document.getElementById('pk-risk').value;
+    var sectors = document.getElementById('pk-sectors').value.trim() || 'all sectors';
+    var macro = document.getElementById('pk-macro').value.trim() || 'none';
+    var notes = document.getElementById('pk-notes').value.trim() || 'none';
+
+    if (!nifty) { alert('Please enter the Nifty 50 current level to proceed.'); return; }
+
+    // Collect live prices and pre-compute all price levels in JS
+    var priceRows = document.querySelectorAll('.price-data-row');
+    var priceMap = {};  // symbol -> { cmp, high, low }
+    priceRows.forEach(function(row) {
+      var sym = row.querySelector('.pr-sym').value.trim().toUpperCase();
+      var cmp = parseFloat(row.querySelector('.pr-cmp').value);
+      var high = parseFloat(row.querySelector('.pr-high').value) || null;
+      var low  = parseFloat(row.querySelector('.pr-low').value)  || null;
+      if (sym && !isNaN(cmp) && cmp > 0) {
+        priceMap[sym] = { cmp: cmp, high: high, low: low };
+      }
+    });
+
+    var hasPrices = Object.keys(priceMap).length > 0;
+
+    // Build the price context block for the prompt
+    var priceLines = [];
+    Object.keys(priceMap).forEach(function(sym) {
+      var p = priceMap[sym];
+      var line = sym + ': CMP=Rs.' + p.cmp.toFixed(2);
+      if (p.high) line += ', 52W-High=Rs.' + p.high.toFixed(2);
+      if (p.low)  line += ', 52W-Low=Rs.'  + p.low.toFixed(2);
+      // Pre-compute BUY levels
+      var buyEntry   = (p.cmp * 0.995).toFixed(2) + ' - ' + (p.cmp * 1.005).toFixed(2);
+      var buyTarget  = (p.cmp * 1.07).toFixed(2);
+      var buyStop    = (p.cmp * 0.96).toFixed(2);
+      // Pre-compute SELL levels
+      var sellEntry  = (p.cmp * 1.005).toFixed(2) + ' - ' + (p.cmp * 0.995).toFixed(2);
+      var sellTarget = (p.cmp * 0.94).toFixed(2);
+      var sellStop   = (p.cmp * 1.03).toFixed(2);
+      line += ' | If BUY -> entry Rs.' + buyEntry + ', target Rs.' + buyTarget + ', SL Rs.' + buyStop;
+      line += ' | If SELL -> entry Rs.' + sellEntry + ', target Rs.' + sellTarget + ', SL Rs.' + sellStop;
+      priceLines.push(line);
+    });
+
+    var priceBlock = hasPrices
+      ? 'VERIFIED LIVE PRICES (pre-computed by user from screener.in -- you MUST use EXACTLY these numbers, do NOT substitute your own prices):\n' + priceLines.join('\n') + '\n\nFOR EVERY PICK: copy the pre-computed entry/target/SL values above EXACTLY into the JSON fields. Do not round differently. Do not use any other price source.'
+      : 'NO LIVE PRICES PROVIDED. You must still output valid JSON but set currentPrice to null and entryRange/target/stopLoss to 0 and add to rationale: "WARNING: No live price entered. Verify price on screener.in before trading."';
+
+    // Warn user if no prices entered
+    if (!hasPrices) {
+      if (!confirm('You have not entered any live prices.\n\nWithout real prices, Claude will use stale training data (may be 1-2 years old).\n\nClick OK to continue anyway, or Cancel to go back and add prices.')) {
+        return;
+      }
+    }
+
+    document.getElementById('picks-input-card').style.display = 'none';
+    document.getElementById('picks-results').style.display = 'none';
+    document.getElementById('picks-error').style.display = 'none';
+    document.getElementById('picks-loading').classList.add('show');
+    animateLoadingSteps();
+
+    var systemPrompt = 'You are a senior NSE India equity research analyst. Your job: decide WHICH stocks to pick and WHY -- all price math is already done for you by the user.\n\nRULE 1 -- PRICES: The user provides pre-computed entry, target, and stop-loss levels for each stock. You MUST copy these numbers EXACTLY into the JSON. Do NOT use your training data prices. Do NOT round or adjust them.\nRULE 2 -- OUTPUT: Return ONLY valid JSON. Zero markdown. Zero backticks. Zero text outside the JSON object.\nRULE 3 -- COUNT: Return exactly 10 picks.\n\nJSON structure:\n{\n  "weekLabel": "string",\n  "marketBias": "Bullish|Bearish|Sideways",\n  "marketOverview": "2-3 sentences",\n  "buyCount": number,\n  "sellCount": number,\n  "picks": [{\n    "rank": 1,\n    "symbol": "SYMBOL",\n    "companyName": "Full Name",\n    "sector": "Sector",\n    "action": "BUY or SELL",\n    "currentPrice": <copy from user data>,\n    "entryRange": "<copy from user data>",\n    "target": <copy number from user data>,\n    "stopLoss": <copy number from user data>,\n    "upsidePct": <calculate from user prices only>,\n    "holdingPeriod": "X-Y days",\n    "tradeType": "Equity|CE Option|PE Option|Futures",\n    "confidence": "High|Medium|Low",\n    "confidencePct": number,\n    "rationale": "technical + fundamental reasoning",\n    "catalyst": "weekly trigger",\n    "risk": "main risk"\n  }]\n}';
+
+    var userPrompt = 'Generate TOP 10 NSE weekly picks for ' + week + '.\n\nMARKET CONTEXT:\nNifty: ' + nifty + ' | VIX: ' + vix + ' | Trend: ' + trend + ' | FII/DII: ' + fii + ' | Preference: ' + pref + ' | Risk: ' + risk + ' | Sectors: ' + sectors + ' | Macro: ' + macro + ' | Notes: ' + notes + '\n\n' + priceBlock + '\n\nInstructions: Choose the best 10 stocks from the list above (or suggest others if the list has fewer than 10, using the same price formula CMP*0.995 entry, CMP*1.07 target, CMP*0.96 SL for BUY). Decide BUY or SELL for each. Write your analysis in the rationale field. Copy all price numbers exactly from the data above.';
+
+    try {
+      var raw = await callClaude(userPrompt, systemPrompt, 4000);
+      clearInterval(loadingInterval);
+      ['ls-1','ls-2','ls-3','ls-4','ls-5'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('active'); el.classList.add('done'); }
+      });
+
+      setTimeout(function() {
+        document.getElementById('picks-loading').classList.remove('show');
+        try {
+          var jsonStr = raw.trim();
+          // Strip markdown fences
+          jsonStr = jsonStr.replace(/^```[a-zA-Z]*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+          // Extract first JSON object if there's preamble
+          if (jsonStr.charAt(0) !== '{') {
+            var match = jsonStr.match(/\{[\s\S]*/);
+            if (match) jsonStr = match[0];
+          }
+          // Repair truncated JSON
+          if (jsonStr.charAt(jsonStr.length - 1) !== '}') {
+            var lastGood = jsonStr.lastIndexOf('},');
+            if (lastGood > 0) {
+              jsonStr = jsonStr.substring(0, lastGood + 1) + ']}';
+            }
+          }
+          var data = JSON.parse(jsonStr);
+
+          // OVERRIDE: force Claude's prices to match user-entered CMP
+          if (data.picks && Object.keys(priceMap).length > 0) {
+            data.picks.forEach(function(pick) {
+              var sym = (pick.symbol || '').toUpperCase();
+              var p = priceMap[sym];
+              if (p && p.cmp) {
+                var cmp = p.cmp;
+                var isBuy = pick.action === 'BUY';
+                pick.currentPrice  = cmp;
+                pick.entryRange    = 'Rs.' + (cmp * 0.995).toFixed(2) + ' - Rs.' + (cmp * 1.005).toFixed(2);
+                pick.target        = parseFloat((isBuy ? cmp * 1.07 : cmp * 0.94).toFixed(2));
+                pick.stopLoss      = parseFloat((isBuy ? cmp * 0.96 : cmp * 1.03).toFixed(2));
+                pick.upsidePct     = parseFloat((isBuy ? 7.0 : 6.0).toFixed(1));
+              }
+            });
+          }
+
+          lastPicksData = data;
+          renderPicksResults(data, week, nifty, vix);
+        } catch(parseErr) {
+          var errEl = document.getElementById('picks-error');
+          errEl.style.display = 'block';
+          errEl.innerHTML = '<div class="error-box"><strong>Parse error. Raw response:</strong><br><br><div style="white-space:pre-wrap;font-size:12px;margin-top:8px;">' + escHtml(raw) + '</div><button class="btn" style="margin-top:12px;" onclick="resetPicks()">Try again</button></div>';
+        }
+      }, 600);
+
+    } catch(err) {
+      clearInterval(loadingInterval);
+      document.getElementById('picks-loading').classList.remove('show');
+      document.getElementById('picks-input-card').style.display = 'block';
+      var errEl = document.getElementById('picks-error');
+      errEl.style.display = 'block';
+      errEl.innerHTML = '<div class="error-box">Error: ' + escHtml(err.message) + '</div>';
+    }
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderPicksResults(data, week, nifty, vix) {
+    document.getElementById('res-week-label').textContent = data.weekLabel || ('Week of ' + week);
+    document.getElementById('res-nifty').textContent = nifty ? 'Rs.' + parseFloat(nifty).toLocaleString('en-IN') : '--';
+    document.getElementById('res-vix').textContent = vix || '--';
+    var biasEl = document.getElementById('res-bias');
+    biasEl.textContent = data.marketBias || '--';
+    biasEl.style.color = data.marketBias === 'Bullish' ? 'var(--green)' : data.marketBias === 'Bearish' ? 'var(--red)' : 'var(--accent)';
+    var buys = data.picks ? data.picks.filter(function(p){ return p.action === 'BUY'; }).length : (data.buyCount || 0);
+    var sells = data.picks ? data.picks.filter(function(p){ return p.action === 'SELL'; }).length : (data.sellCount || 0);
+    document.getElementById('res-buys').textContent = buys + ' stocks';
+    document.getElementById('res-sells').textContent = sells + ' stocks';
+
+    if (data.marketOverview) {
+      document.getElementById('res-overview').textContent = data.marketOverview;
+      document.getElementById('res-overview-card').style.display = 'block';
+    }
+
+    document.getElementById('tab-raw').textContent = JSON.stringify(data, null, 2);
+
+    // Sector tab
+    var sectorMap = {};
+    if (data.picks) {
+      data.picks.forEach(function(p) {
+        var s = p.sector || 'Other';
+        if (!sectorMap[s]) sectorMap[s] = { buy: 0, sell: 0 };
+        if (p.action === 'BUY') sectorMap[s].buy++; else sectorMap[s].sell++;
+      });
+    }
+    var sectorHTML = Object.keys(sectorMap).map(function(sec) {
+      var counts = sectorMap[sec];
+      return '<div class="sector-row">' +
+        '<div class="sector-name">' + escHtml(sec) + '</div>' +
+        '<div style="display:flex;gap:4px;flex:1;align-items:center;">' +
+          (counts.buy > 0 ? '<div style="height:6px;width:' + (counts.buy*30) + 'px;background:var(--green);border-radius:3px;"></div>' : '') +
+          (counts.sell > 0 ? '<div style="height:6px;width:' + (counts.sell*30) + 'px;background:var(--red);border-radius:3px;"></div>' : '') +
+        '</div>' +
+        '<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted);width:80px;text-align:right;">' +
+          (counts.buy > 0 ? '<span style="color:var(--green)">' + counts.buy + 'B</span>' : '') +
+          (counts.buy > 0 && counts.sell > 0 ? ' &middot; ' : '') +
+          (counts.sell > 0 ? '<span style="color:var(--red)">' + counts.sell + 'S</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('tab-sectors').innerHTML = '<div style="padding:4px 0;">' + sectorHTML + '</div>';
+
+    renderPickCards(data.picks || [], 'all');
+    document.getElementById('picks-results').style.display = 'block';
+  }
+
+  function renderPickCards(picks, filter) {
+    currentFilter = filter;
+    var filtered = picks;
+    if (filter === 'buy') filtered = picks.filter(function(p){ return p.action === 'BUY'; });
+    if (filter === 'sell') filtered = picks.filter(function(p){ return p.action === 'SELL'; });
+    if (filter === 'high') filtered = picks.filter(function(p){ return p.confidence === 'High'; });
+
+    var grid = document.getElementById('picks-grid');
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#128269;</div><p>No picks match this filter.</p></div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(function(p) {
+      var isBuy = p.action === 'BUY';
+      var upside = p.upsidePct || 0;
+      var confPct = p.confidencePct || 75;
+      var confClass = p.confidence === 'High' ? 'high' : p.confidence === 'Low' ? 'low' : 'medium';
+      var arrow = isBuy ? '&#9650;' : '&#9660;';
+      var upsideAbs = Math.abs(upside).toFixed(1);
+      return '<div class="pick-card ' + (isBuy ? 'buy-card' : 'sell-card') + '">' +
+        '<div class="pick-card-header">' +
+          '<div>' +
+            '<div class="pick-rank">#' + p.rank + ' &middot; ' + escHtml(p.tradeType || 'Equity') + '</div>' +
+            '<div class="pick-name">' + escHtml(p.symbol) + '</div>' +
+            '<div class="pick-sector">' + escHtml(p.companyName || '') + (p.sector ? ' &middot; ' + escHtml(p.sector) : '') + '</div>' +
+          '</div>' +
+          '<div><div class="pick-action-badge ' + (isBuy ? 'buy' : 'sell') + '">' + p.action + '</div></div>' +
+        '</div>' +
+        '<div class="pick-levels">' +
+          '<div class="pick-level"><div class="pick-level-lbl">Entry</div><div class="pick-level-val">' + escHtml(p.entryRange || ('Rs.' + (p.currentPrice || '--'))) + '</div></div>' +
+          '<div class="pick-level"><div class="pick-level-lbl">Target</div><div class="pick-level-val target">Rs.' + (p.target ? p.target.toLocaleString('en-IN') : '--') + '</div></div>' +
+          '<div class="pick-level"><div class="pick-level-lbl">Stop Loss</div><div class="pick-level-val stoploss">Rs.' + (p.stopLoss ? p.stopLoss.toLocaleString('en-IN') : '--') + '</div></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">' +
+          '<div class="pick-upside' + (!isBuy ? ' downside' : '') + '">' + arrow + ' ' + upsideAbs + '% potential</div>' +
+          '<div style="font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;">&#8987; ' + escHtml(p.holdingPeriod || '3-5 days') + '</div>' +
+        '</div>' +
+        '<div class="pick-rationale">' +
+          '<strong style="color:var(--text);font-size:12px;">Rationale:</strong> ' + escHtml(p.rationale || '--') +
+          (p.catalyst ? '<br><span style="color:var(--accent);">Catalyst: ' + escHtml(p.catalyst) + '</span>' : '') +
+          (p.risk ? '<br><span style="color:var(--red);font-size:11px;">Risk: ' + escHtml(p.risk) + '</span>' : '') +
+        '</div>' +
+        '<div class="pick-confidence">' +
+          '<div class="confidence-lbl">' + escHtml(p.confidence || 'Medium') + ' confidence</div>' +
+          '<div class="confidence-bar"><div class="confidence-fill ' + confClass + '" style="width:' + confPct + '%"></div></div>' +
+          '<div class="confidence-lbl">' + confPct + '%</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function filterPicks(type, el) {
+    document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+    if (lastPicksData) renderPickCards(lastPicksData.picks, type);
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    el.classList.add('active');
+    ['tab-cards','tab-raw','tab-sectors'].forEach(function(id){
+      document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('tab-' + tab).style.display = 'block';
+  }
+
+  function resetPicks() {
+    document.getElementById('picks-input-card').style.display = 'block';
+    document.getElementById('picks-results').style.display = 'none';
+    document.getElementById('picks-error').style.display = 'none';
+    lastPicksData = null;
+  }
+
+  // TRADE PLAN
+  async function runPlan() {
+    var stock = document.getElementById('p-stock').value.trim();
+    var spot = document.getElementById('p-spot').value.trim();
+    if (!stock || !spot) { alert('Please enter at least the stock and current spot price.'); return; }
+    showLoading('p-result');
+    var prompt = 'You are a senior NSE India options trading analyst. Generate a structured trade plan.\n\nStock: ' + stock + '\nDate: ' + (document.getElementById('p-date').value || 'today') + '\nSpot: Rs.' + spot + '\nPrev close: Rs.' + (document.getElementById('p-prev').value || 'N/A') + '\nVIX: ' + (document.getElementById('p-vix').value || 'N/A') + '\nRisk: ' + document.getElementById('p-risk').value + '\nCapital: Rs.' + (document.getElementById('p-capital').value || 'N/A') + '\nLevels: ' + (document.getElementById('p-levels').value || 'N/A') + '\nNews: ' + (document.getElementById('p-news').value || 'none') + '\nOptions chain: ' + (document.getElementById('p-chain').value || 'none') + '\n\nProvide:\n1. MARKET BIAS - Bullish/Bearish/Sideways\n2. TRADE IDEA - Strategy, strike, expiry\n3. ENTRY - Price range\n4. TARGET - With reasoning\n5. STOP LOSS - Cut loss level\n6. POSITION SIZE - Lots for given capital\n7. RISK/REWARD - Max profit, max loss, ratio\n8. WHAT TO WATCH - 2-3 invalidation signals\n9. TIMING - Best time to enter\n\nEnd with: This is not financial advice. Always verify and use a stop loss.';
+    try { showResult('p-result', await callClaude(prompt)); }
+    catch(e) { showResult('p-result', 'Error: ' + e.message); }
+  }
+
+  // SENTIMENT
+  async function runSentiment() {
+    var stock = document.getElementById('s-stock').value.trim();
+    var news = document.getElementById('s-news').value.trim();
+    if (!stock || !news) { alert('Please fill both fields.'); return; }
+    showLoading('s-result');
+    var prompt = 'NSE India market analyst. Analyze news for ' + stock + ':\n' + news + '\n\nProvide:\n1. Sentiment: Bullish/Bearish/Neutral with confidence %\n2. Key positive factors (max 3)\n3. Key risks (max 3)\n4. Short-term outlook\n5. Options implication: CE or PE?\nEnd with disclaimer.';
+    try { showResult('s-result', await callClaude(prompt)); }
+    catch(e) { showResult('s-result', 'Error: ' + e.message); }
+  }
+
+  // OPTIONS CHAIN
+  async function runOptions() {
+    var stock = document.getElementById('o-stock').value.trim();
+    var chain = document.getElementById('o-chain').value.trim();
+    if (!stock || !chain) { alert('Please fill stock and options chain.'); return; }
+    showLoading('o-result');
+    var prompt = 'NSE India options analyst. Analyze options chain for ' + stock + ' (Expiry: ' + (document.getElementById('o-expiry').value || 'N/A') + '):\n' + chain + '\n\nProvide:\n1. PCR interpretation\n2. Max pain strike\n3. Support/resistance from OI\n4. Smart money positioning\n5. View: Bullish/Bearish/Sideways\n6. Interesting strikes for buying\nEnd with disclaimer.';
+    try { showResult('o-result', await callClaude(prompt)); }
+    catch(e) { showResult('o-result', 'Error: ' + e.message); }
+  }
+
+  // RISK REWARD
+  async function runRR() {
+    var stock = document.getElementById('r-stock').value.trim();
+    var strike = document.getElementById('r-strike').value;
+    var premium = document.getElementById('r-premium').value;
+    var lot = document.getElementById('r-lot').value;
+    if (!stock || !strike || !premium || !lot) { alert('Please fill required fields.'); return; }
+    showLoading('r-result');
+    var prompt = 'NSE options risk calculator:\nStock: ' + stock + '\nStrategy: ' + document.getElementById('r-strategy').value + '\nStrike: Rs.' + strike + ', Premium: Rs.' + premium + ', Lot size: ' + lot + '\nSpot: Rs.' + (document.getElementById('r-spot').value || 'N/A') + ', Target: Rs.' + (document.getElementById('r-target').value || 'N/A') + '\n\nCalculate: max profit, max loss, breakeven, R/R ratio, stop loss suggestion.\nShow all calculations step by step. End with disclaimer.';
+    try { showResult('r-result', await callClaude(prompt)); }
+    catch(e) { showResult('r-result', 'Error: ' + e.message); }
+  }
+
+  // PORTFOLIO HELPERS
+  function fmt(n) { return 'Rs.' + Math.round(n).toLocaleString('en-IN'); }
+
+  function addTrade() {
+    var stock = document.getElementById('a-stock').value.trim();
+    var entry = parseFloat(document.getElementById('a-entry').value);
+    var cmp = parseFloat(document.getElementById('a-cmp').value);
+    var lots = parseInt(document.getElementById('a-lots').value);
+    var lotsize = parseInt(document.getElementById('a-lotsize').value);
+    var msg = document.getElementById('a-msg');
+    if (!stock || isNaN(entry) || isNaN(lots) || isNaN(lotsize)) {
+      msg.className = 'msg-err'; msg.textContent = 'Please fill stock, entry price, lots, and lot size.'; return;
+    }
+    trades.push({
+      id: Date.now(), stock: stock,
+      date: document.getElementById('a-date').value.trim(),
+      type: document.getElementById('a-type').value,
+      strike: document.getElementById('a-strike').value.trim(),
+      expiry: document.getElementById('a-expiry').value.trim(),
+      entry: entry, cmp: isNaN(cmp) ? entry : cmp,
+      lots: lots, lotsize: lotsize,
+      sl: parseFloat(document.getElementById('a-sl').value) || null,
+      target: parseFloat(document.getElementById('a-tgt').value) || null,
+      notes: document.getElementById('a-notes').value.trim()
+    });
+    save();
+    msg.className = 'msg-ok'; msg.textContent = 'OK - ' + stock + ' added to portfolio!';
+    ['a-stock','a-date','a-strike','a-expiry','a-entry','a-cmp','a-lots','a-lotsize','a-sl','a-tgt','a-notes'].forEach(function(id){ document.getElementById(id).value = ''; });
+    updateMetrics();
+  }
+
+  function closeTrade(id) {
+    var exitStr = prompt('Enter exit price (Rs.):');
+    if (!exitStr) return;
+    var exit = parseFloat(exitStr);
+    if (isNaN(exit)) { alert('Invalid price'); return; }
+    var idx = trades.findIndex(function(t){ return t.id === id; });
+    if (idx === -1) return;
+    var t = trades[idx];
+    var sign = t.type === 'PE' ? -1 : 1;
+    var pnl = (exit - t.entry) * t.lots * t.lotsize * sign;
+    closedTrades.push(Object.assign({}, t, { exit: exit, pnl: pnl, closedDate: new Date().toLocaleDateString('en-IN') }));
+    trades.splice(idx, 1);
+    save(); renderOpen(); updateMetrics();
+  }
+
+  function deleteTrade(id) {
+    if (!confirm('Delete this trade?')) return;
+    trades = trades.filter(function(t){ return t.id !== id; });
+    save(); renderOpen(); updateMetrics();
+  }
+
+  function updateCMP(id) {
+    var val = parseFloat(prompt('Enter new CMP (Rs.):'));
+    if (isNaN(val)) return;
+    var t = trades.find(function(t){ return t.id === id; });
+    if (t) { t.cmp = val; save(); renderOpen(); updateMetrics(); }
+  }
+
+  function updateMetrics() {
+    var invested = trades.reduce(function(s,t){ return s + t.entry * t.lots * t.lotsize; }, 0);
+    var unreal = trades.reduce(function(s,t){
+      var sign = t.type === 'PE' ? -1 : 1;
+      return s + (t.cmp - t.entry) * t.lots * t.lotsize * sign;
+    }, 0);
+    var real = closedTrades.reduce(function(s,t){ return s + (t.pnl || 0); }, 0);
+    document.getElementById('m-open').textContent = trades.length;
+    document.getElementById('m-invest').textContent = fmt(invested);
+    document.getElementById('m-unreal').textContent = fmt(unreal);
+    document.getElementById('m-real').textContent = fmt(real);
+    document.getElementById('m-unreal-card').className = 'metric-card ' + (unreal >= 0 ? 'pos' : 'neg');
+    document.getElementById('m-real-card').className = 'metric-card ' + (real >= 0 ? 'pos' : 'neg');
+  }
+
+  function renderOpen() {
+    var tbody = document.getElementById('open-tbody');
+    if (!trades.length) {
+      tbody.innerHTML = '<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">&#128194;</div><p>No open trades. Use "Add Trade" to log your first position.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = trades.map(function(t) {
+      var sign = t.type === 'PE' ? -1 : 1;
+      var pnl = (t.cmp - t.entry) * t.lots * t.lotsize * sign;
+      var invested = t.entry * t.lots * t.lotsize;
+      return '<tr>' +
+        '<td>' + (t.date || '--') + '</td>' +
+        '<td style="font-weight:500">' + escHtml(t.stock) + '</td>' +
+        '<td><span class="badge badge-' + t.type.toLowerCase() + '">' + t.type + '</span></td>' +
+        '<td class="mono">' + (t.strike || '--') + '</td>' +
+        '<td>' + (t.expiry || '--') + '</td>' +
+        '<td class="mono">Rs.' + t.entry.toLocaleString('en-IN') + '</td>' +
+        '<td><span class="cmp-click mono" onclick="updateCMP(' + t.id + ')">Rs.' + t.cmp.toLocaleString('en-IN') + '</span></td>' +
+        '<td>' + t.lots + '</td>' +
+        '<td>' + t.lotsize + '</td>' +
+        '<td class="mono">' + fmt(invested) + '</td>' +
+        '<td class="' + (pnl >= 0 ? 'profit' : 'loss') + '">' + (pnl >= 0 ? '+' : '') + fmt(pnl) + '</td>' +
+        '<td class="mono">' + (t.sl ? 'Rs.' + t.sl : '--') + '</td>' +
+        '<td class="mono">' + (t.target ? 'Rs.' + t.target : '--') + '</td>' +
+        '<td style="display:flex;gap:6px;padding-top:8px;">' +
+          '<button class="btn btn-green" onclick="closeTrade(' + t.id + ')">Close</button>' +
+          '<button class="btn btn-red" onclick="deleteTrade(' + t.id + ')">Del</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderClosed() {
+    var tbody = document.getElementById('closed-tbody');
+    if (!closedTrades.length) {
+      tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">&#9989;</div><p>No closed trades yet.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = closedTrades.map(function(t) {
+      var pnl = t.pnl || 0;
+      return '<tr>' +
+        '<td>' + (t.closedDate || '--') + '</td>' +
+        '<td style="font-weight:500">' + escHtml(t.stock) + '</td>' +
+        '<td><span class="badge badge-' + t.type.toLowerCase() + '">' + t.type + '</span></td>' +
+        '<td class="mono">' + (t.strike || '--') + '</td>' +
+        '<td class="mono">Rs.' + t.entry.toLocaleString('en-IN') + '</td>' +
+        '<td class="mono">Rs.' + (t.exit||0).toLocaleString('en-IN') + '</td>' +
+        '<td>' + t.lots + '</td><td>' + t.lotsize + '</td>' +
+        '<td class="' + (pnl >= 0 ? 'profit' : 'loss') + '">' + (pnl >= 0 ? '+' : '') + fmt(pnl) + '</td>' +
+        '<td><span class="badge ' + (pnl >= 0 ? 'badge-ce' : 'badge-pe') + '">' + (pnl >= 0 ? 'Profit' : 'Loss') + '</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // PORTFOLIO REVIEW
+  async function runReview() {
+    showLoading('rv-result');
+    var openSummary = trades.length === 0 ? 'No open trades.' :
+      trades.map(function(t) {
+        var sign = t.type === 'PE' ? -1 : 1;
+        var pnl = (t.cmp - t.entry) * t.lots * t.lotsize * sign;
+        return t.stock + ' ' + t.type + ' ' + t.strike + ' | Entry Rs.' + t.entry + ' | CMP Rs.' + t.cmp + ' | ' + t.lots + 'x' + t.lotsize + ' | P&L Rs.' + Math.round(pnl) + ' | SL:' + (t.sl||'none') + ' Target:' + (t.target||'none');
+      }).join('\n');
+    var closedSummary = closedTrades.length === 0 ? 'No closed trades.' :
+      closedTrades.map(function(t){ return t.stock + ' ' + t.type + ' | Rs.' + t.entry + '->Rs.' + (t.exit||0) + ' | P&L Rs.' + Math.round(t.pnl||0); }).join('\n');
+    var totalPnl = closedTrades.reduce(function(s,t){ return s+(t.pnl||0); }, 0);
+    var unrealPnl = trades.reduce(function(s,t){ var sign=t.type==='PE'?-1:1; return s+(t.cmp-t.entry)*t.lots*t.lotsize*sign; }, 0);
+    var q = document.getElementById('rv-q').value.trim();
+    var prompt = 'Senior NSE trading coach. Portfolio review.\n\nOPEN:\n' + openSummary + '\n\nCLOSED:\n' + closedSummary + '\n\nRealised P&L: Rs.' + Math.round(totalPnl) + ' | Unrealised: Rs.' + Math.round(unrealPnl) + ' | Open: ' + trades.length + ' | Closed: ' + closedTrades.length + (q ? '\n\nSPECIFIC QUESTION: ' + q : '') + '\n\nProvide:\n1. PORTFOLIO HEALTH\n2. RISK EXPOSURE\n3. OPEN TRADE ALERTS\n4. PERFORMANCE (win rate)\n5. TOP CONCERN\n6. ACTION ITEMS (3 things to do today)\n\nBe direct. End with: This is not financial advice.';
+    try { showResult('rv-result', await callClaude(prompt)); }
+    catch(e) { showResult('rv-result', 'Error: ' + e.message); }
+  }
+
+  // TRADE JOURNAL
+  async function runJournal() {
+    var trades_txt = document.getElementById('j-trades').value.trim();
+    if (!trades_txt) { alert('Please paste your trade data.'); return; }
+    showLoading('j-result');
+    var q = document.getElementById('j-question').value.trim();
+    var prompt = 'Trading coach reviewing NSE India trader journal.\n' + (q ? 'Focus: ' + q + '\n' : '') + '\nTrades:\n' + trades_txt + '\n\nProvide: win rate, avg P&L, winning patterns, losing patterns/mistakes, psychological biases, 3 improvement suggestions.\nEnd with disclaimer.';
+    try { showResult('j-result', await callClaude(prompt)); }
+    catch(e) { showResult('j-result', 'Error: ' + e.message); }
+  }
+
+  // INIT
+  renderOpen();
+  renderClosed();
+  updateMetrics();
+</script>
+</body>
+</html>
